@@ -4,10 +4,11 @@
 # 	EXE_NAME=my_prj
 # 	SOURCES += foo.c/xx/pp
 # 	SOURCES += $(call rwildcard,.,*.cpp)
+# 	INCDIR += $(dir ($(call rwildcard,.,*.h)))
 # 	MAKE_EXECUTABLE=yes
 # 	MAKE_BINARY=no
-# 	MAKE_SHARED_LIB=no
-# 	MAKE_STATIC_LIB=no
+# 	MAKE_SHARED_LIB=yes
+# 	MAKE_STATIC_LIB=yes
 # 
 # 	BUILDDIR = build$(TCHAIN)
 # 
@@ -33,7 +34,7 @@ LST=$(TCHAIN)objdump
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
 #######################################
-# color @ verbose settings
+# color & verbose settings
 #######################################
 ifeq ($(strip $(COLORIZE)),yes)
 	CLRED=\e[31m
@@ -56,7 +57,6 @@ else
 	Q:= 
 	VECHO=@true
 endif
-
 
 #######################################
 # manage output files suffixes
@@ -207,10 +207,17 @@ debug:
 	@echo "So:       " $(S_OBJECTS)
 	@echo ""
 	@echo "Lnk Obj:  " $(LINK_OBJECTS)
-	@echo "Artifacts:" $(ARTEFACTS)
+	@echo "Artefacts:" $(ARTEFACTS)
+	@echo ""
+	@echo "Sources:  " $(SOURCES)
+	@echo "INCDIR:   " $(INCDIR)
+
+ifneq ($(FOREIGN_MAKE_TARGETS),)
+clean: clean_foreign_targets
+endif
 
 clean:
-	$(Q)rm -fr $(BUILDDIR) 
+	$(Q)rm -fr $(BUILDDIR)
 
 $(LINK_OBJECTS): Makefile
 
@@ -311,3 +318,7 @@ $(BUILDDIR):
 .PHONY: $(FOREIGN_MAKE_TARGETS)
 $(FOREIGN_MAKE_TARGETS):
 	$(MAKE) -C $(subst build/,,$(dir $@))
+
+.PHONY: clean_foreign_targets
+clean_foreign_targets:
+	$(foreach var,$(FOREIGN_MAKE_TARGETS),$(MAKE) -C $(subst build/,,$(dir $(var))) clean;)
