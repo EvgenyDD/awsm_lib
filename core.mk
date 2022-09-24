@@ -129,6 +129,8 @@ LDFLAGS+=$(addprefix -T,$(LDSCRIPT))
 #######################################
 # sort sources & generate object names
 #######################################
+INCDIR:=$(sort $(foreach _HEADERS, $(INCDIR), $(_HEADERS)))
+
 CXX_SOURCES:=$(filter %.cpp %.cxx %.c++ %.cc %.C, $(SOURCES))
 CXX_OBJECTS:=$(CXX_SOURCES:.cpp=.o)
 CXX_OBJECTS:=$(CXX_OBJECTS:.cxx=.o)
