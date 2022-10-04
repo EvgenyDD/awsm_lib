@@ -12,6 +12,9 @@
 # 
 # 	BUILDDIR = build$(TCHAIN)
 # 
+#   EXT_LIBS+=setupapi
+#   LIBDIR+=
+#
 # 	FOREIGN_MAKE_TARGETS=extlib/build/libext.so
 #
 # #####       Other: 		      #####
@@ -96,6 +99,7 @@ ifeq ($(MAKE_BINARY),)
 endif
 
 OBJDIR:=$(BUILDDIR)/obj
+UPDIR:=_updir_
 
 EXT_OBJECTS+=$(FOREIGN_MAKE_TARGETS)
 
@@ -145,9 +149,9 @@ S_SOURCES:=$(filter %.s %.S, $(SOURCES))
 S_OBJECTS:=$(S_SOURCES:.s=.o)
 S_OBJECTS:=$(S_OBJECTS:.S=.o)
 
-CXX_OBJECTS:=$(subst ..,up,$(addprefix $(OBJDIR)/, $(CXX_OBJECTS)))
-C_OBJECTS:=$(subst ..,up,$(addprefix $(OBJDIR)/, $(C_OBJECTS)))
-S_OBJECTS:=$(subst ..,up,$(addprefix $(OBJDIR)/, $(S_OBJECTS)))
+CXX_OBJECTS:=$(subst ..,$(UPDIR),$(addprefix $(OBJDIR)/, $(CXX_OBJECTS)))
+C_OBJECTS:=$(subst ..,$(UPDIR),$(addprefix $(OBJDIR)/, $(C_OBJECTS)))
+S_OBJECTS:=$(subst ..,$(UPDIR),$(addprefix $(OBJDIR)/, $(S_OBJECTS)))
 
 #######################################
 # decide which linker to use C or C++
@@ -227,14 +231,14 @@ $(LINK_OBJECTS): Makefile
 # assembler targets
 #######################################
 .SECONDEXPANSION:
-$(OBJDIR)/%.o: $$(subst up,..,%.s) $(SELFDEP)
-	@mkdir -p $@
+$(OBJDIR)/%.o: $$(subst $(UPDIR),..,%.s) $(SELFDEP)
+	@mkdir -p $(@D)
 	$(VECHO) ' [$(CLGRN)S$(CLRST)]   $< ...\n'
 	$(Q)$(CC) $(FLAGS) $(CFLAGS) $< -o $@
 
 .SECONDEXPANSION:
-$(OBJDIR)/%.o: $$(subst up,..,%.S) $(SELFDEP)
-	@mkdir -p $@
+$(OBJDIR)/%.o: $$(subst $(UPDIR),..,%.S) $(SELFDEP)
+	@mkdir -p $(@D)
 	$(VECHO) ' [$(CLGRN)S$(CLRST)]   $< ...\n'
 	$(Q)$(CC) $(FLAGS) $(CFLAGS) $< -o $@
 
@@ -242,8 +246,8 @@ $(OBJDIR)/%.o: $$(subst up,..,%.S) $(SELFDEP)
 # C targets
 #######################################
 .SECONDEXPANSION:
-$(OBJDIR)/%.o: $$(subst up,..,%.c) $(SELFDEP)
-	@mkdir -p $@
+$(OBJDIR)/%.o: $$(subst $(UPDIR),..,%.c) $(SELFDEP)
+	@mkdir -p $(@D)
 	$(VECHO) ' [$(CLGRN)C$(CLRST)]   $< ...\n'
 	$(Q)$(CC) $(FLAGS) $(CFLAGS) $< -o $@
 
@@ -251,31 +255,31 @@ $(OBJDIR)/%.o: $$(subst up,..,%.c) $(SELFDEP)
 # C++ targets
 #######################################
 .SECONDEXPANSION:
-$(OBJDIR)/%.o: $$(subst up,..,%.cpp) $(SELFDEP)
+$(OBJDIR)/%.o: $$(subst $(UPDIR),..,%.cpp) $(SELFDEP)
 	@mkdir -p $(@D)
 	$(VECHO) ' [$(CLYEL)C++$(CLRST)] $< ...\n'
 	$(Q)$(CXX) $(FLAGS) $(CXXFLAGS) $< -o $@
 
 .SECONDEXPANSION:
-$(OBJDIR)/%.o: $$(subst up,..,%.C) $(SELFDEP)
+$(OBJDIR)/%.o: $$(subst $(UPDIR),..,%.C) $(SELFDEP)
 	@mkdir -p $(@D)
 	$(VECHO) ' [$(CLYEL)C++$(CLRST)] $< ...\n'
 	$(Q)$(CXX) $(FLAGS) $(CXXFLAGS) $< -o $@
 
 .SECONDEXPANSION:
-$(OBJDIR)/%.o: $$(subst up,..,%.cxx) $(SELFDEP)
+$(OBJDIR)/%.o: $$(subst $(UPDIR),..,%.cxx) $(SELFDEP)
 	@mkdir -p $(@D)
 	$(VECHO) ' [$(CLYEL)C++$(CLRST)] $< ...\n'
 	$(Q)$(CXX) $(FLAGS) $(CXXFLAGS) $< -o $@
 
 .SECONDEXPANSION:
-$(OBJDIR)/%.o: $$(subst up,..,%.cc) $(SELFDEP)
+$(OBJDIR)/%.o: $$(subst $(UPDIR),..,%.cc) $(SELFDEP)
 	@mkdir -p $(@D)
 	$(VECHO) ' [$(CLYEL)C++$(CLRST)] $< ...\n'
 	$(Q)$(CXX) $(FLAGS) $(CXXFLAGS) $< -o $@
 
 .SECONDEXPANSION:
-$(OBJDIR)/%.o: $$(subst up,..,%.c++) $(SELFDEP)
+$(OBJDIR)/%.o: $$(subst $(UPDIR),..,%.c++) $(SELFDEP)
 	@mkdir -p $(@D)
 	$(VECHO) ' [$(CLYEL)C++$(CLRST)] $< ...\n'
 	$(Q)$(CXX) $(FLAGS) $(CXXFLAGS) $< -o $@
@@ -306,7 +310,7 @@ $(LISTING) : $(EXECUTABLE)
 	$(Q)$(LST) -d -t -S $< >$(@)
 
 $(BUILDDIR):
-	mkdir $(BUILDDIR)
+	@mkdir $(BUILDDIR)
 
 #######################################
 # Include header dependencies
