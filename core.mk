@@ -9,6 +9,7 @@
 # 	MAKE_BINARY=no
 # 	MAKE_SHARED_LIB=yes
 # 	MAKE_STATIC_LIB=yes
+#   PPDEFS=STM32 VAR0=12
 # 
 # 	BUILDDIR = build$(TCHAIN)
 # 
@@ -19,6 +20,7 @@
 #
 # #####       Other: 		      #####
 # 	TCHAIN = x86_64-w64-mingw32-
+#   LDFLAGS += -static (on win c++ mingw)
 # 	CREATE_MAP=yes
 # 	CREATE_LST=yes
 # 	COLORIZE=yes
