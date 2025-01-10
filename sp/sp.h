@@ -138,6 +138,7 @@ void sp_enumerate_finish(sp_list_t *list);
 int sp_open(sp_t *sp, const char *port_name, void (*cb_rx)(sp_t *sp, const uint8_t *data, size_t len), void *priv);
 int sp_open_ext(sp_t *sp, const char *port_name, void (*cb_rx)(sp_t *sp, const uint8_t *data, size_t len), void *priv,
 				uint32_t baudrate, sp_bytesize_t bytesize, sp_parity_t parity, sp_stopbits_t stopbits, sp_flowcontrol_t flowcontrol);
+// 115200, SP_BYTESIZE_8, SP_PARITY_NONE, SP_STOP_BITS_1, SP_FLOW_NONE
 void sp_close(sp_t *sp);
 
 int sp_write(sp_t *sp, const void *data, size_t size);

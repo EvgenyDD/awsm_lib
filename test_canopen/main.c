@@ -93,6 +93,7 @@ int main(void)
 	// CHK(sp_open(&sp, "COM6", sp_rx, co));
 	// CHK(sp_open(&sp, "/dev/ttyS5", sp_rx, co));
 	CHK(sp_open(&sp, 0, sp_rx, co));
+	// CHK(sp_open_ext(&sp, 0, sp_rx, co, 115200, SP_BYTESIZE_8, SP_PARITY_NONE, SP_STOP_BITS_1, SP_FLOW_NONE));
 	if(sts) goto FIN;
 
 #if 0
