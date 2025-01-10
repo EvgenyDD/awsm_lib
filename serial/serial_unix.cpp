@@ -361,7 +361,7 @@ int serial_port_reconfigure(serial_port_t *sp)
 	options.c_cc[VTIME] = 0;
 
 	// activate settings
-	::tcsetattr(sp->fd_, TCSANOW, &options);
+	/*::*/tcsetattr(sp->fd_, TCSANOW, &options);
 
 	// Update byte_time_ based on the new settings.
 	uint32_t bit_time_ns = 1e9 / sp->baudrate_;
@@ -450,7 +450,6 @@ void serial_port_waitByteTimes(serial_port_t *sp, size_t count)
 
 int _read(serial_port_t *sp, uint8_t *buf, size_t size)
 {
-	// If the port is not open, throw
 	if(!sp->is_open_) return 0;
 	size_t bytes_read = 0;
 
@@ -854,6 +853,46 @@ size_t _serial_port_read(serial_port_t *sp, std::vector<uint8_t> *buf)
 
 #include "serial_interface.h"
 #include <algorithm>
+
+int read_com(int fd, int len , int timeout, uint8_t * buff){
+        int ret = 0;
+        
+        struct pollfd fds;
+        fds.fd=fd;
+        fds.events = POLLIN;
+        poll(&fds, 1, timeout);
+        if(fds.revents & POLLIN) {
+                ret = read(fd, buff, len);
+        }
+        if(ret<0){
+                ret = 0;
+        }
+        return ret; 
+}
+
+int write_com(int fd, uint8_t * buf, size_t size, int timeout){
+        int ret = 0;
+
+        struct pollfd fds;
+        fds.fd=fd;
+        fds.events = POLLOUT;
+        
+        poll(&fds, 1, timeout);
+        if(fds.revents & POLLOUT){
+#ifdef USE_RTS
+                set_rts(fd,RTS_SET);
+#endif
+                ret = write(fd, (uint8_t*)buf, size);
+
+                tcdrain(fd); 
+#ifdef USE_RTS
+                set_rts(fd,RTS_CLR);
+#endif
+        }
+        
+        if(ret!=size) return 0;
+        return 1; 
+}
 
 size_t serial_port_read(serial_port_t *sp, std::vector<uint8_t> *buffer)
 {

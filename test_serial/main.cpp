@@ -2,14 +2,13 @@
 #include <iostream>
 #include <string>
 
-//#if !defined(_WIN32) && !defined(__OpenBSD__) && !defined(__FreeBSD__)
-//#include <alloca.h>
-//#endif
+// #if !defined(_WIN32) && !defined(__OpenBSD__) && !defined(__FreeBSD__)
+// #include <alloca.h>
+// #endif
 
-//#if defined (__MINGW32__)
-//#define alloca __builtin_alloca
-//#endif
-
+// #if defined (__MINGW32__)
+// #define alloca __builtin_alloca
+// #endif
 
 // OS Specific sleep
 #ifdef _WIN32
@@ -105,25 +104,36 @@
 
 int main(int argc, char **argv)
 {
-	std::vector<PortInfo> devices_found = serial_port_get_list();
-	std::vector<PortInfo>::iterator iter = devices_found.begin();
-	if(!devices_found.size())
-	{
-		printf("No COM ports avail!\n");
-		return -1;
-	}
+	// std::vector<PortInfo> devices_found = serial_port_get_list();
+	// std::vector<PortInfo>::iterator iter = devices_found.begin();
+	// if(!devices_found.size())
+	// {
+	// 	printf("No COM ports avail!\n");
+	// 	return -1;
+	// }
 
-	printf("Avail. COM devices: \n");
-	PortInfo device;
-	while(iter != devices_found.end())
+	// printf("Avail. COM devices: \n");
+	// PortInfo device;
+	// while(iter != devices_found.end())
+	// {
+	// 	device = *iter++;
+	// 	printf("\t%s\t%s\t%s\n", device.port.c_str(), device.description.c_str(), device.hardware_id.c_str());
+	// }
+
+	serial_port_list_ids_t sp_list;
+	serial_port_info_t sp_info;
+	serial_port_list_start(sp_list);
+	std::string port_to_use = "";
+	while(serial_port_list_get_next(sp_list, sp_info))
 	{
-		device = *iter++;
-		printf("\t%s\t%s\t%s\n", device.port.c_str(), device.description.c_str(), device.hardware_id.c_str());
+		printf("SP: %s %s %s\n", sp_info.port, sp_info.hardware_id, sp_info.description);
+		/*if(port_to_use == "") */ port_to_use = std::string(sp_info.port);
 	}
+	serial_port_list_terminate(sp_list);
 
 	serial_port_t p = {0};
 	serial_port_init(&p,
-					 /*"/dev/ttyS6"*/ device.port,
+					 /*"/dev/ttyS6"*/ /*device.port*/ port_to_use,
 					 115200,
 					 eightbits,
 					 parity_odd,
@@ -132,6 +142,7 @@ int main(int argc, char **argv)
 
 	int sts = serial_port_open(&p);
 	printf("Open sts: %d\n", sts);
+	if(sts) return sts;
 
 	sts = serial_port_write(&p, {9, 0, 1, 2, 3});
 	printf("Wr sts: %d\n", sts);

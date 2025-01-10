@@ -4,18 +4,20 @@ INCDIR += $(dir ($(call rwildcard,.,*.h)))
 INCDIR += $(dir ($(call rwildcard,../serial,*.h)))
 INCDIR += ..
 
-TCHAIN = x86_64-w64-mingw32-
+MINGW=1
 
-# EXT_LIBS+=SetupAPI_x86
 EXT_LIBS+=setupapi
-LIBDIR+=../serial
 
-VERBOSE=yes
+ifneq ($(strip $(MINGW)),) 
+	TCHAIN = x86_64-w64-mingw32-
+	EXT_LIBS+=setupapi
+# LDFLAGS+=-Wl,-Bstatic
+endif
 
 include ../core.mk
 
-all: run
+# all: run
 
-.PHONY: run
+# .PHONY: run
 run: $(EXECUTABLE)
 	@$(EXECUTABLE)

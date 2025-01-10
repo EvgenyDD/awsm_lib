@@ -11,7 +11,8 @@
 #endif
 
 #if defined(__linux__) || defined(__CYGWIN__)
-#include <glob.h>
+
+#warning "UNIX version"
 
 static std::vector<std::string> glob_(const std::vector<std::string> &patterns)
 {
@@ -228,6 +229,96 @@ std::vector<PortInfo> serial_port_get_list(void)
 		results.push_back(device_entry);
 	}
 	return results;
+}
+
+static const char *search_sources[] = {
+	"/dev/ttyACM*",
+	"/dev/ttyS*",
+	"/dev/ttyUSB*",
+	"/dev/tty.*",
+	"/dev/cu.*",
+};
+
+void serial_port_list_start(serial_port_list_ids_t &list)
+{
+	glob(search_sources[0], 0, nullptr, &list.globbuf);
+	for(size_t i = 1; i < sizeof(search_sources) / sizeof(search_sources[0]); i++)
+	{
+		glob(search_sources[i], GLOB_APPEND, nullptr, &list.globbuf);
+	}
+	list.iter = 0;
+
+	// for(int path_index = 0; path_index < CAST(int, list.globbuf.gl_pathc); path_index++)
+	// {
+	// 	paths_found.push_back(list.globbuf.gl_pathv[path_index]);
+	// }
+
+	printf("SOURCES Count: %ld\n", list.globbuf.gl_pathc);
+}
+
+int serial_port_list_get_next(serial_port_list_ids_t &list, serial_port_info_t &info)
+{
+	while(list.iter < list.globbuf.gl_pathc)
+	{
+		std::string device = *iter++;
+
+		{
+			size_t pos = path.rfind("/");
+			if(pos == std::string::npos) return path;
+			return std::string(path, pos + 1, std::string::npos);
+		}
+		std::string device_name = basename(device_path);
+		std::string friendly_name;
+		std::string hardware_id;
+		std::string sys_device_path = format("/sys/class/tty/%s/device", device_name.c_str());
+
+		if(device_name.compare(0, 6, "ttyUSB") == 0)
+		{
+			sys_device_path = dirname(dirname(realpath_(sys_device_path)));
+
+			if(path_exists(sys_device_path))
+			{
+				friendly_name = usb_sysfs_friendly_name(sys_device_path);
+				hardware_id = usb_sysfs_hw_string(sys_device_path);
+			}
+		}
+		else if(device_name.compare(0, 6, "ttyACM") == 0)
+		{
+			sys_device_path = dirname(realpath_(sys_device_path));
+
+			if(path_exists(sys_device_path))
+			{
+				friendly_name = usb_sysfs_friendly_name(sys_device_path);
+				hardware_id = usb_sysfs_hw_string(sys_device_path);
+			}
+		}
+		else
+		{
+			// Try to read ID string of PCI device
+			std::string sys_id_path = sys_device_path + "/id";
+			if(path_exists(sys_id_path)) hardware_id = read_line(sys_id_path);
+		}
+
+		if(friendly_name.empty()) friendly_name = device_name;
+		if(hardware_id.empty()) hardware_id = "n/a";
+
+		std::vector<std::string> result;
+		result.push_back(friendly_name);
+		result.push_back(hardware_id);
+
+		info.port = device;
+		info.description = friendly_name;
+		info.hardware_id = hardware_id;
+
+		list.iter++;
+		return 1;
+	}
+	return 0;
+}
+
+void serial_port_list_terminate(serial_port_list_ids_t &list)
+{
+	globfree(&list.globbuf);
 }
 
 #endif // defined(__linux__)

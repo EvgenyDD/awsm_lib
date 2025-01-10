@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 static inline void memcpy_byte(uint8_t *dst, uint32_t offset_dst_bits /* < 8 */, const uint8_t src, uint32_t offset_src_bits /* < 8 */, uint32_t size_bits)
 {
 	// if(size_bits >= 8 && offset_dst_bits == 0 && offset_src_bits == 0)
@@ -10,7 +12,7 @@ static inline void memcpy_byte(uint8_t *dst, uint32_t offset_dst_bits /* < 8 */,
 	*dst = (*dst & ~mask_dst) | (((src >> offset_src_bits) << offset_dst_bits) & mask_dst);
 }
 
-static inline void memcpy_bits(uint8_t *dst, uint32_t off_dst_bits, const uint8_t *src, uint32_t off_src_bits, uint32_t sz_src_bits)
+void memcpy_bits(uint8_t *dst, uint32_t off_dst_bits, const uint8_t *src, uint32_t off_src_bits, uint32_t sz_src_bits)
 {
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))

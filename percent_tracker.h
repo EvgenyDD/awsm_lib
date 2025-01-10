@@ -1,3 +1,4 @@
+// version: 1
 #include <stdint.h>
 #include <sys/time.h>
 
@@ -38,9 +39,10 @@ typedef struct
 //	PERCENT_TRACKER_INIT(tr);
 //	for(uint32_t i = 0; i < 100; i++)
 //	{
-//		PERCENT_TRACKER_TRACK(tr, (float)i / (float)(100), { printf("\r%.1f%% | pass: %lld sec | est: %lld sec",
+//		PERCENT_TRACKER_TRACK(tr, (float)i / (float)(100), { printf("\r%.1f%% | pass: %lld sec | est: %lld sec\t\t\t",
 //																	100.0 * tr.progress,
 //																	tr.time_ms_pass / 1000,
 //																	tr.time_ms_est / 1000); });
+//		fflush(stdout);
 //		usleep(200000);
 //	}
