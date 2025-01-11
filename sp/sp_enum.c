@@ -43,7 +43,7 @@ int sp_enumerate(sp_list_t *list)
 	SP_DEVINFO_DATA dev_info;
 	dev_info.cbSize = sizeof(SP_DEVINFO_DATA);
 
-	while(SetupDiEnumDeviceInfo(list->device_info_set, list->idx++, &dev_info))
+	while(SetupDiEnumDeviceInfo(list->device_info_set, (DWORD)list->idx++, &dev_info))
 	{
 		HKEY hkey = SetupDiOpenDevRegKey(list->device_info_set, &dev_info, DICS_FLAG_GLOBAL, 0, DIREG_DEV, KEY_READ);
 

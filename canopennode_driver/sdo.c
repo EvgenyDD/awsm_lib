@@ -5,6 +5,24 @@
 
 #define TIME_DELTA_US(x, y) ((x.tv_sec - y.tv_sec) * 1000000LL + (x.tv_usec - y.tv_usec))
 
+#ifndef CO_SDO_HI_SPEED_MODE
+#ifdef _WIN32
+#include <windows.h>
+#define SLEEP_MS(msecs) Sleep(msecs)
+#else
+#include <errno.h>
+#include <time.h>
+#define SLEEP_MS(msecs)                                                            \
+	struct timespec ts = {.tv_sec = msecs / 1000, .tv_nsec = msecs % 1000 * 1000}; \
+	int res;                                                                       \
+	do                                                                             \
+	{                                                                              \
+		errno = 0;                                                                 \
+		res = nanosleep(&ts, NULL);                                                \
+	} while(res != 0 && errno == EINTR)
+#endif
+#endif
+
 CO_SDO_abortCode_t read_SDO(CO_SDOclient_t *SDO_C, uint8_t nodeId, uint16_t index, uint8_t subIndex, uint8_t *buf, size_t bufSize, size_t *readSize, uint32_t timeout_ms)
 {
 	*readSize = 0;
