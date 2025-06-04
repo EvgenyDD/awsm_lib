@@ -39,21 +39,7 @@ void cb_co_frame_tx(void *priv, can_msg_t *msg)
 	putchar('\n');
 }
 
-static void sp_rx(sp_t *sp, const uint8_t *data, size_t len)
-{
-#ifdef PRINT_FRAMES
-	PT();
-	putchar('\t');
-	for(uint32_t i = 0; i < len; i++)
-	{
-		put_ascii(data[i]);
-	}
-	putchar('\n');
-#endif
-
-	CO_t *co = (CO_t *)sp->priv;
-	slcan_parse(co->CANmodule, data, len);
-}
+static void sp_rx(sp_t *sp, const uint8_t *data, size_t len) { slcan_parse(((CO_t *)sp->priv)->CANmodule, data, len); }
 
 #define CHK(x) \
 	if((sts = x) != 0) printf("ERR %s: %s\n", #x, sp_err2_str(sts))

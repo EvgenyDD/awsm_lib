@@ -52,6 +52,7 @@ static void *thr_rcv(void *arg)
 				if(readed <= 0)
 				{
 					sp->thr_error = SP_ERR_READ;
+					if(sp->cb_err) sp->cb_err(sp);
 					sp->thr_exited = true;
 					return 0;
 				}
@@ -61,6 +62,7 @@ static void *thr_rcv(void *arg)
 		else if(n < 0)
 		{
 			sp->thr_error = SP_ERR_READ;
+			if(sp->cb_err) sp->cb_err(sp);
 			sp->thr_exited = true;
 			return 0;
 		}

@@ -269,7 +269,11 @@
 #define CO_RX_IDX_HB_CONS   (CO_RX_IDX_SDO_CLI  + CO_RX_CNT_SDO_CLI)
 #define CO_RX_IDX_LSS_SLV   (CO_RX_IDX_HB_CONS  + CO_RX_CNT_HB_CONS)
 #define CO_RX_IDX_LSS_MST   (CO_RX_IDX_LSS_SLV  + CO_RX_CNT_LSS_SLV)
+#ifdef CO_CONFIG_TERM_LISTENER
+#define CO_CNT_ALL_RX_MSGS  (CO_RX_IDX_LSS_MST  + CO_RX_CNT_LSS_MST + CO_RX_CNT_TERM_LISTENER)
+#else
 #define CO_CNT_ALL_RX_MSGS  (CO_RX_IDX_LSS_MST  + CO_RX_CNT_LSS_MST)
+#endif
 
 #define CO_TX_IDX_NMT_MST   0
 #define CO_TX_IDX_SYNC      (CO_TX_IDX_NMT_MST  + CO_TX_CNT_NMT_MST)
@@ -283,7 +287,11 @@
 #define CO_TX_IDX_HB_PROD   (CO_TX_IDX_SDO_CLI  + CO_TX_CNT_SDO_CLI)
 #define CO_TX_IDX_LSS_SLV   (CO_TX_IDX_HB_PROD  + CO_TX_CNT_HB_PROD)
 #define CO_TX_IDX_LSS_MST   (CO_TX_IDX_LSS_SLV  + CO_TX_CNT_LSS_SLV)
+#ifdef CO_CONFIG_TERM
+#define CO_CNT_ALL_TX_MSGS  (CO_TX_IDX_LSS_MST  + CO_TX_CNT_LSS_MST + CO_TX_CNT_TERM)
+#else
 #define CO_CNT_ALL_TX_MSGS  (CO_TX_IDX_LSS_MST  + CO_TX_CNT_LSS_MST)
+#endif
 #endif /* #ifdef #else CO_MULTIPLE_OD */
 
 
@@ -1019,7 +1027,7 @@ CO_ReturnError_t CO_CANopenInit(CO_t *co,
     /* SDOserver */
     if (CO_GET_CNT(SDO_SRV) > 0) {
         OD_entry_t *SDOsrvPar = OD_GET(H1200, OD_H1200_SDO_SERVER_1_PARAM);
-        for (int16_t i = 0; i < CO_GET_CNT(SDO_SRV); i++) {
+        for (uint16_t i = 0; i < CO_GET_CNT(SDO_SRV); i++) {
             err = CO_SDOserver_init(&co->SDOserver[i],
                                     od,
                                     SDOsrvPar++,

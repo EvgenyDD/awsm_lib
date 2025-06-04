@@ -25,6 +25,7 @@ static unsigned int __stdcall thr_rcv(void *data)
 				if(GetLastError() != ERROR_IO_PENDING)
 				{
 					sp->thr_error = SP_ERR_WAIT_COMM_EVENT;
+					if(sp->cb_err) sp->cb_err(sp);
 					return 0;
 				}
 				sp->evt_waiting = true;
@@ -53,6 +54,7 @@ static unsigned int __stdcall thr_rcv(void *data)
 			default:
 				sp->evt_waiting = false;
 				sp->thr_error = SP_ERR_GET_OVERLAP;
+				if(sp->cb_err) sp->cb_err(sp);
 				return 0;
 			}
 		}
@@ -66,6 +68,7 @@ static unsigned int __stdcall thr_rcv(void *data)
 				if(!ReadFile(sp->fd, sp->data_rx, sz, &readed, &sp->fd_overlap_read))
 				{
 					sp->thr_error = SP_ERR_READ;
+					if(sp->cb_err) sp->cb_err(sp);
 					return 0;
 				}
 				if(readed > 0) sp->cb_rx(sp, sp->data_rx, readed);

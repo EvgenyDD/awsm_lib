@@ -29,7 +29,7 @@
 #include "301/CO_driver.h"
 #include "301/CO_ODinterface.h"
 #include "301/CO_NMT_Heartbeat.h"
-
+#include "co_term.h"
 
 /* default configuration, see CO_config.h */
 #ifndef CO_CONFIG_TIME
@@ -115,6 +115,7 @@ typedef struct {
     /** Extension for OD object */
     OD_extension_t OD_1012_extension;
 #endif
+    CO_term_t *t;
 } CO_TIME_t;
 
 

@@ -111,6 +111,7 @@ struct sp_t
 	volatile bool thr_run;
 	int thr_error;
 	void (*cb_rx)(sp_t *sp, const uint8_t *data, size_t len);
+	void (*cb_err)(sp_t *sp);
 	uint8_t data_rx[SP_RX_SIZE];
 	void *priv;
 

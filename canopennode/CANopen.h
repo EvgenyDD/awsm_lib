@@ -45,6 +45,7 @@
 #include "305/CO_LSSmaster.h"
 #include "309/CO_gateway_ascii.h"
 #include "extra/CO_trace.h"
+#include "co_term.h"
 
 
 #ifdef __cplusplus
@@ -408,7 +409,9 @@ typedef struct {
     /** Trace object, initialised by @ref CO_trace_init(). */
     CO_trace_t *trace;
 #endif
-
+#ifdef CO_CONFIG_TERM
+   CO_term_t term;
+#endif
 } CO_t;
 
 /**

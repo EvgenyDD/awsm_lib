@@ -3,6 +3,7 @@
 #include "CANopen.h"
 #include "CO_driver_target.h"
 #include "OD.h"
+#include "co_term.h"
 #include "sp.h"
 #include <sys/time.h>
 
@@ -26,7 +27,7 @@
 	} while(res != 0 && errno == EINTR)
 #endif
 
-uint8_t active_can_node_id = 2;			/* Copied from CO_pending_can_node_id in the communication reset section */
+uint8_t g_active_can_node_id = 2;		/* Copied from CO_pending_can_node_id in the communication reset section */
 static uint8_t pending_can_node_id = 2; /* read from nonvolatile memory, configurable by LSS slave */
 static uint16_t pending_can_baud = 500; /* read from nonvolatile memory, configurable by LSS slave */
 
@@ -52,6 +53,9 @@ static void *thr_rcv(void *data)
 		tprev = tnow;
 		gettimeofday(&tnow, NULL);
 		CO_process(co, false, TIME_DELTA_US(tnow, tprev), NULL);
+#ifdef CO_CONFIG_TERM
+		co_term_poll(&co->term);
+#endif
 		SLEEP_MS(TUNE_DELAY);
 	}
 #if !defined(_WIN32)
@@ -78,7 +82,7 @@ int co_wrapper_init(CO_t **co, sp_t *sp)
 		OD_PERSIST_COMM.x1016_consumerHeartbeatTime[i] = ((i + 1) << 16) | 2500;
 	}
 
-	active_can_node_id = pending_can_node_id;
+	g_active_can_node_id = pending_can_node_id;
 	uint32_t errInfo = 0;
 	CO_ReturnError_t err = CO_CANopenInit(*co,		   /* CANopen object */
 										  NULL,		   /* alternate NMT */
@@ -90,13 +94,18 @@ int co_wrapper_init(CO_t **co, sp_t *sp)
 										  1000,		   /* SDOserverTimeoutTime_ms */
 										  500,		   /* SDOclientTimeoutTime_ms */
 										  false,	   /* SDOclientBlockTransfer */
-										  active_can_node_id,
+										  g_active_can_node_id,
 										  &errInfo);
 
 	if(err != CO_ERROR_NO && err != CO_ERROR_NODE_ID_UNCONFIGURED_LSS) return err;
 
-	err = CO_CANopenInitPDO(*co, (*co)->em, OD, active_can_node_id, &errInfo);
+	err = CO_CANopenInitPDO(*co, (*co)->em, OD, g_active_can_node_id, &errInfo);
 	if(err != CO_ERROR_NO && err != CO_ERROR_NODE_ID_UNCONFIGURED_LSS) return 5;
+
+#ifdef CO_CONFIG_TERM
+	(*co)->TIME->t = &(*co)->term;
+	co_term_init(&(*co)->term, (*co)->CANmodule, (*co)->TIME->CANtxBuff);
+#endif
 
 	CO_CANsetNormalMode((*co)->CANmodule);
 

@@ -52,6 +52,10 @@ static void CO_TIME_receive(void *object, void *msg) {
         }
 #endif
     }
+    else
+    {
+        CANOPEN_TIME_TERMINAL_MACRO();
+    }
 }
 
 
